@@ -81,9 +81,18 @@ const surprises = [
 const calendar=document.getElementById("calendar");
 const modal=document.getElementById("modal");
 
-// Fecha de apertura: calendario de diciembre de 2026
-const year=2026;
-const today=new Date();
+const modal=document.getElementById("modal");
+
+// MODO SECRETO PARA VER TODOS LOS DÍAS
+const password="NAVIDAD2026";
+const admin=prompt("Introduce la contraseña de administrador:");
+
+const previewMode=admin===password;
+
+if(previewMode){
+  document.getElementById("notice").textContent=
+  "🎄 MODO DE PRUEBA ACTIVADO 🎄";
+}
 
 surprises.forEach((item,index)=>{
   const day=index+1;
@@ -95,11 +104,13 @@ surprises.forEach((item,index)=>{
 
   const button=document.createElement("button");
   button.className="day"+(day===24?" special":"");
-  button.disabled=!unlocked;
-  button.innerHTML=
+  button.disabled=!(unlocked || previewMode);
+  const canOpen=unlocked || previewMode;
+
+button.innerHTML=
     `<span class="number">${day}</span>
-     <span>${unlocked?"✉":"🔒"}</span>
-     <small>${unlocked?"ABRIR":"CERRADO"}</small>`;
+     <span>${canOpen?"✉":"🔒"}</span>
+     <small>${canOpen?"ABRIR":"CERRADO"}</small>`;
 
   button.addEventListener("click",()=>{
     document.getElementById("modalDay").textContent="DÍA "+day+" · DICIEMBRE";
