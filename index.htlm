@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Un diciembre especial ❤️</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(145deg,#092d25,#18503e,#092d25);color:#fff8e9;font-family:Georgia,serif;text-align:center}
+main{width:min(900px,94%);margin:auto;padding:40px 0;position:relative}
+.snow{position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(white 1.5px,transparent 2px),radial-gradient(white 1px,transparent 2px);background-size:100px 100px,150px 150px;animation:snow 12s linear infinite;opacity:.5}
+@keyframes snow{to{background-position:100px 400px,-100px 300px}}
+.gold{color:#e8c77b}
+h1{font-size:clamp(38px,8vw,65px);font-weight:normal;margin:15px}
+.subtitle{font:15px/1.7 Arial;max-width:500px;margin:20px auto 30px;color:#eee5d6}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.day{min-height:110px;border:1px solid #d8b66c;border-radius:15px;background:#ffffff12;color:white;cursor:pointer;font-family:Georgia;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px}
+.day:disabled{opacity:.45;cursor:not-allowed}
+.day:not(:disabled):hover{background:#e8c77b33;transform:translateY(-3px)}
+.number{font-size:32px;color:#e8c77b}
+.day small{font:10px Arial;letter-spacing:1px}
+.special{background:#9e344066;border:2px solid #e8c77b}
+footer{margin-top:30px;font:13px/1.8 Arial;color:#ddd}
+.modal{display:none;position:fixed;inset:0;background:#000b;z-index:5;align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.letter{background:#fff8e9;color:#26382f;padding:30px 25px;border-radius:20px;width:min(450px,100%)}
+.letter h2{color:#174534;font-size:29px;font-weight:normal}
+.letter p{font:16px/1.8 Arial;white-space:pre-line}
+.close{background:#174534;color:white;border:0;border-radius:30px;padding:12px 25px;cursor:pointer}
+@media(max-width:550px){.grid{grid-template-columns:repeat(3,1fr);gap:9px}.day{min-height:100px}}
+</style>
+</head>
+<body>
+<div class="snow"></div>
+<main>
+<div class="gold">✦ DICIEMBRE 2026 ✦</div>
+<h1>Un diciembre<br>especial ❤️</h1>
+<p class="subtitle">24 días, 24 pequeños detalles. Cada día esconde una sorpresa preparada especialmente para ti. 🎄</p>
+<div class="gold">❄ ✦ ❄ ✦ ❄</div>
+<p class="subtitle" id="notice">Una ventanita nueva cada día... ❤️</p>
+<section class="grid" id="calendar"></section>
+<footer>Hecho con mucho cariño ❤️<br>Un pequeño detalle para alguien especial.</footer>
+</main>
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+<div class="letter">
+<div class="gold" id="modalDay"></div>
+<h2 id="modalTitle"></h2>
+<p id="modalMessage"></p>
+<button class="close" onclick="closeModal()">Cerrar ❤️</button>
+</div>
+</div>
+<script>
+// CAMBIA AQUÍ LOS MENSAJES
+const surprises = [
+["Empezamos diciembre","Quería empezar este mes con un pequeño detalle para ti. Espero que diciembre te traiga momentos preciosos."],
+["Una sonrisa","Espero que hoy encuentres muchos motivos para sonreír. Me encanta hablar contigo."],
+["Algo que valoro","Me gusta mucho la confianza que tenemos y lo fácil que es hablar contigo."],
+["Un deseo","Espero que hoy tengas un día increíble."],
+["Tu forma de ser","Hay muchas cosas que hacen especial a una persona, y de ti me gusta tu forma de ser."],
+["Un recuerdo","A veces una conversación normal termina convirtiéndose en un recuerdo bonito."],
+["Una canción","Hoy quiero dedicarte esta canción: [AÑADE UNA CANCIÓN]."],
+["Un cumplido","Tienes una forma de alegrar los días sin darte cuenta."],
+["Un plan","Me gustaría que algún día pudiéramos pasar un rato juntos."],
+["Una invitación","¿Te apetecería que fuéramos a comer algún día? Me haría mucha ilusión. ❤️"],
+["Un detalle","A veces basta con hablar contigo para que un día sea especial."],
+["Lo que admiro","Me gusta que seas tú misma. No cambies."],
+["Un día bonito","Espero que hoy tengas un día genial."],
+["Una foto","Aquí quiero guardar un recuerdo bonito: [AÑADE UNA FOTO O RECUERDO]."],
+["Gracias","Gracias por las conversaciones y por esos pequeños momentos que valoro tanto."],
+["Una casualidad","A veces conoces a alguien sin imaginar lo importante que puede llegar a ser."],
+["Algo sincero","Disfruto muchísimo hablando contigo."],
+["Tu sonrisa","Espero que hoy sonrías mucho."],
+["Un deseo para ti","Te deseo días preciosos, muchas risas y momentos inolvidables."],
+["Un poquito de valentía","A veces merece la pena ser sincero con lo que sentimos."],
+["Ya queda poquito","Cada detalle de este calendario está preparado con mucha ilusión."],
+["Algo que quería decirte","Me pareces una persona increíble."],
+["Mañana","Mañana quiero contarte algo importante. No tienes que sentir ninguna presión."],
+["Mi mensaje final ❤️","Quería decirte que me gustas. Me encanta cómo eres y disfruto muchísimo hablando contigo. No te digo esto para presionarte ni para que tengas que responder de una forma concreta. Simplemente quería que lo supieras. Sea cual sea tu respuesta, valoro mucho nuestra amistad. ❤️"]
+];
+
+const calendar=document.getElementById("calendar");
+const modal=document.getElementById("modal");
+
+// Fecha de apertura: calendario de diciembre de 2026
+const year=2026;
+const today=new Date();
+
+surprises.forEach((item,index)=>{
+  const day=index+1;
+  const unlocked=
+    today.getFullYear()>year ||
+    (today.getFullYear()===year &&
+    today.getMonth()===11 &&
+    today.getDate()>=day);
+
+  const button=document.createElement("button");
+  button.className="day"+(day===24?" special":"");
+  button.disabled=!unlocked;
+  button.innerHTML=
+    `<span class="number">${day}</span>
+     <span>${unlocked?"✉":"🔒"}</span>
+     <small>${unlocked?"ABRIR":"CERRADO"}</small>`;
+
+  button.addEventListener("click",()=>{
+    document.getElementById("modalDay").textContent="DÍA "+day+" · DICIEMBRE";
+    document.getElementById("modalTitle").textContent=item[0];
+    document.getElementById("modalMessage").textContent=item[1];
+    modal.classList.add("show");
+  });
+
+  calendar.appendChild(button);
+});
+
+function closeModal(){modal.classList.remove("show")}
+modal.addEventListener("click",e=>{
+  if(e.target===modal)closeModal();
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")closeModal();
+});
+</script>
+</body>
+</html>
